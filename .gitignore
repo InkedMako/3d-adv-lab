@@ -5,9 +5,27 @@ __pycache__/
 *.pyd
 
 # Dataset and experiment artifacts
-data/
-outputs/
-work_dirs/
+# Keep directory structure only (.gitkeep/README), ignore real artifacts.
+data/**
+!data/.gitkeep
+!data/README.md
+!data/**/
+!data/**/.gitkeep
+!data/**/README.md
+
+outputs/**
+!outputs/.gitkeep
+!outputs/README.md
+!outputs/**/
+!outputs/**/.gitkeep
+!outputs/**/README.md
+
+work_dirs/**
+!work_dirs/.gitkeep
+!work_dirs/README.md
+!work_dirs/**/
+!work_dirs/**/.gitkeep
+!work_dirs/**/README.md
 
 # Jupyter
 .ipynb_checkpoints/
