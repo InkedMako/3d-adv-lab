@@ -59,6 +59,7 @@
 
 当前文件：
 - docs/INSTALLATION.md
+- docs/TEAM_ENV_SETUP.md
 - docs/POINTCLOUD_TESTING_GUIDE.md
 - docs/DATASET_ATTACK_DEFENSE_WORKFLOW.md
 - docs/MULTIMODAL_DIRECTION.md
@@ -142,9 +143,13 @@
 ## 5. 快速开始
 
 1. 阅读 docs/INSTALLATION.md 完成环境搭建。
-2. 执行 scripts/minimal_pointcloud_smoke_test.py 验证基础链路。
-3. 执行 scripts/run_pointcloud_pipeline.py 生成 clean/adv/defended 样本。
-4. 执行 scripts/visualize_pointcloud_samples.py 生成可视化图。
+2. 小组统一搭建可参考 docs/TEAM_ENV_SETUP.md。
+3. 执行 scripts/minimal_pointcloud_smoke_test.py 验证基础链路。
+4. 执行 scripts/run_pointcloud_pipeline.py 生成 clean/adv/defended 样本。
+5. 执行 scripts/visualize_pointcloud_samples.py 生成可视化图。
+6. 执行 scripts/inspect_mvxnet_kitti_config.py 查看正式 KITTI 多模态配置清单。
+7. 执行 scripts/run_mvxnet_kitti_training.py 启动正式的 KITTI 多模态训练入口。
+8. 执行 scripts/run_multimodal_robustness_eval.py 进行模型级 clean/attack/defense 三分支评估。
 
 ## 6. 环境重建与提交规范（推荐）
 
