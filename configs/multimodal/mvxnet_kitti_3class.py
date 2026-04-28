@@ -1,15 +1,15 @@
-"""KITTI LiDAR-camera fusion detection starter template.
+"""MVXNet-style KITTI LiDAR-camera fusion config.
 
-This template is aligned with the real MVXNet KITTI config in OpenMMLab.
+This file is a separate runnable experiment config, kept close to the upstream
+OpenMMLab KITTI MVXNet reference while remaining compatible with this project.
 """
 
 _base_ = ["../base/runtime_template.py"]
 
-experiment_name = "kitti_mvxnet_fusion_template"
-work_dir = "work_dirs/kitti_mvxnet_fusion_template"
+experiment_name = "mvxnet_kitti_3class_train"
+work_dir = "work_dirs/mvxnet_kitti_3class_train"
 
 
-# KITTI multimodal baseline aligned with open-mmlab/mmdetection3d MVXNet.
 dataset_type = "KittiDataset"
 data_root = "data/kitti/"
 class_names = ["Pedestrian", "Cyclist", "Car"]
@@ -74,14 +74,10 @@ test_pipeline = [
             dict(type="PointsRangeFilter", point_cloud_range=point_cloud_range),
         ],
     ),
-    dict(
-        type="Pack3DDetInputs",
-        keys=["points", "img"],
-    ),
+    dict(type="Pack3DDetInputs", keys=["points", "img"]),
 ]
 
 
-# Mirrors the upstream eval pipeline used for visualization.
 eval_pipeline = [
     dict(
         type="LoadPointsFromFile",
@@ -197,11 +193,7 @@ model = dict(
             loss_weight=1.0,
         ),
         loss_bbox=dict(type="mmdet.SmoothL1Loss", beta=1.0 / 9.0, loss_weight=2.0),
-        loss_dir=dict(
-            type="mmdet.CrossEntropyLoss",
-            use_sigmoid=False,
-            loss_weight=0.2,
-        ),
+        loss_dir=dict(type="mmdet.CrossEntropyLoss", use_sigmoid=False, loss_weight=0.2),
     ),
     train_cfg=dict(
         pts=dict(
@@ -297,6 +289,7 @@ val_dataloader = dict(
 
 test_dataloader = val_dataloader
 
+
 optim_wrapper = dict(
     optimizer=dict(type="AdamW", lr=0.0003, weight_decay=0.01),
     clip_grad=dict(max_norm=35, norm_type=2),
@@ -306,7 +299,7 @@ param_scheduler = [
     dict(type="CosineAnnealingLR", by_epoch=True, T_max=80, eta_min=0.000003),
 ]
 
-train_cfg = dict(by_epoch=True, max_epochs=80, val_interval=1)
+train_cfg = dict(by_epoch=True, max_epochs=80, val_interval=5)
 val_cfg = dict()
 test_cfg = dict()
 
@@ -314,7 +307,6 @@ val_evaluator = dict(type="KittiMetric", ann_file=data_root + "kitti_infos_val.p
 test_evaluator = val_evaluator
 
 
-# Real KITTI MVXNet checkpoint from the upstream OpenMMLab config.
 load_from = (
     "https://download.openmmlab.com/mmdetection3d/pretrain_models/"
     "mvx_faster_rcnn_detectron2-caffe_20e_coco-pretrain_gt-sample_kitti-3-class_"

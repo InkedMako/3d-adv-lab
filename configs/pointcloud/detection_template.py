@@ -8,7 +8,7 @@ work_dir = "work_dirs/pointcloud_detection_template"
 
 # Choose one and adjust paths
 dataset_type = "KittiDataset"
-data_root = "data/raw/kitti/"
+data_root = "data/kitti/"
 class_names = ["Car", "Pedestrian", "Cyclist"]
 
 

@@ -112,6 +112,7 @@ def main() -> int:
     parser.add_argument("--noise-std", type=float, default=0.02, help="Gaussian noise used in the attack step.")
     parser.add_argument("--drop-ratio", type=float, default=0.15, help="Point drop ratio used in the attack step.")
     parser.add_argument("--voxel-size", type=float, default=0.05, help="Voxel size used in the defense step.")
+    parser.add_argument("--render", action="store_true", help="Enable 3D visualization preview rendering (requires display, not recommended for headless containers).")
     args = parser.parse_args()
 
     output_dir = Path(args.output_dir)
@@ -134,12 +135,16 @@ def main() -> int:
     np.save(output_dir / "adversarial.npy", attacked_points)
     np.save(output_dir / "defended.npy", defended_points)
 
-    try:
-        render_preview(output_dir / "clean.png", clean_points)
-        render_preview(output_dir / "adversarial.png", attacked_points)
-        render_preview(output_dir / "defended.png", defended_points)
-    except Exception as exc:
-        print(f"[warn] preview rendering failed: {exc}")
+    if args.render:
+        try:
+            render_preview(output_dir / "clean.png", clean_points)
+            render_preview(output_dir / "adversarial.png", attacked_points)
+            render_preview(output_dir / "defended.png", defended_points)
+            print("[info] preview rendering completed")
+        except Exception as exc:
+            print(f"[warn] preview rendering failed: {exc}")
+    else:
+        print("[info] preview rendering skipped (use --render to enable)")
 
     report = {
         "clean": summarize(clean_points),
