@@ -115,8 +115,6 @@ python3 scripts/run_experiment_multimodal_real.py --num-samples 10
 - 可能遇到各种编译错误
 - 调试困难
 
-详细文档：[WINDOWS_CUDA_INSTALLATION.md](WINDOWS_CUDA_INSTALLATION.md)
-
 ---
 
 ## 方案三：使用ONNX Runtime
@@ -144,8 +142,6 @@ python3 scripts/run_experiment_multimodal_real.py --num-samples 10
 ```powershell
 pip install onnxruntime-directml
 ```
-
-详细文档：[ONNX_RUNTIME_GUIDE.md](ONNX_RUNTIME_GUIDE.md)
 
 ---
 

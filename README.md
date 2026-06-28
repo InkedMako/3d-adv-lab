@@ -89,10 +89,10 @@ ed-adv/
 │   └ run_experiment_*.py    # 实验运行脚本
 ├── docs/                    # 项目文档
 │   ├── INSTALLATION.md      # 安装指南
-│   ├── TEAM_ENV_SETUP.md    # 环境配置
-│   └ WINDOWS_OPTIONS_GUIDE.md
-│   └ WSL2_CUDA_INSTALLATION.md
+│   ├── WINDOWS_OPTIONS_GUIDE.md  # Windows方案选择
+│   └ WSL2_CUDA_INSTALLATION.md   # WSL2 GPU配置
 ├── deploy/                  # 部署脚本
+│   └ LINUX_DEPLOYMENT_GUIDE.md  # Linux服务器部署
 ├── work_dirs/               # 模型权重与日志
 ├── environment.yml          # Conda 环境定义
 ├── requirements.txt         # pip 依赖
@@ -314,10 +314,9 @@ npm run dev
 | 文档 | 路径 | 说明 |
 |------|------|------|
 | 安装指南 | [docs/INSTALLATION.md](docs/INSTALLATION.md) | 详细安装步骤 |
-| 环境配置 | [docs/TEAM_ENV_SETUP.md](docs/TEAM_ENV_SETUP.md) | 团队环境统一 |
-| Windows指南 | [docs/WINDOWS_OPTIONS_GUIDE.md](docs/WINDOWS_OPTIONS_GUIDE.md) | Windows开发选项 |
+| Windows方案 | [docs/WINDOWS_OPTIONS_GUIDE.md](docs/WINDOWS_OPTIONS_GUIDE.md) | Windows开发方案选择 |
 | WSL2 CUDA | [docs/WSL2_CUDA_INSTALLATION.md](docs/WSL2_CUDA_INSTALLATION.md) | WSL2 GPU配置 |
-| Linux部署 | [deploy/LINUX_DEPLOYMENT_GUIDE.md](deploy/LINUX_DEPLOYMENT_GUIDE.md) | 服务器部署 |
+| Linux部署 | [deploy/LINUX_DEPLOYMENT_GUIDE.md](deploy/LINUX_DEPLOYMENT_GUIDE.md) | 服务器部署指南 |
 
 ---
 
