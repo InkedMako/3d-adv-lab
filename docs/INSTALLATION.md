@@ -85,7 +85,7 @@ Windows 工作区下的 `.sh` 文件默认为 CRLF 行尾，直接在容器中�
 ```bash
 # 方法1：运行时直接规范化行尾
 docker run --rm -v "${PWD}:/workspace" -w /workspace 3d-adv-lab:cu124 bash -lc \
-  "tr -d '\\r' < scripts/install_ubuntu_env.sh > /tmp/install.sh && bash /tmp/install.sh"
+  "tr -d '\r' < scripts/install_ubuntu_env.sh > /tmp/install.sh && bash /tmp/install.sh"
 
 # 方法2：下载仓库后先转换所有 Shell 脚本为 LF
 dos2unix scripts/*.sh
@@ -107,7 +107,33 @@ python scripts/minimal_pointcloud_smoke_test.py --render
 
 验证环境是否就绪：检查 `outputs/smoke_test` 目录下是否存在 `report.json`（各样本的统计数据）。
 
-## 9. 备注
+## 9. 前后端启动
+
+### 9.1 后端服务启动
+
+```bash
+# 在容器中启动后端
+docker run --rm -v "${PWD}:/workspace" -w /workspace 3d-adv-lab:cu124 bash -lc \
+  "source /workspace/.venv/bin/activate && python backend/app.py"
+
+# 或直接在Windows Conda环境中启动
+conda activate mm3d
+python backend/app.py
+```
+
+后端服务地址：`http://localhost:5000`
+
+### 9.2 前端服务启动
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+前端服务地址：`http://localhost:5173`
+
+## 10. 备注
 
 当前工作区中已经保留了安装脚本 [install_ubuntu_env.sh](../scripts/install_ubuntu_env.sh)、Python 依赖定义 `requirements.txt` 和 `environment.yml`。  
 Docker 镜像构建时会自动补齐所有系统库和 Python 包，无需手工操作。

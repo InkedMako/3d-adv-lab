@@ -1,11 +1,11 @@
 .venv/
+.venv311/
+venv/
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 
-# Dataset and experiment artifacts
-# Keep directory structure only (.gitkeep/README), ignore real artifacts.
 data/**
 !data/.gitkeep
 !data/README.md
@@ -16,21 +16,32 @@ data/**
 outputs/**
 !outputs/.gitkeep
 !outputs/README.md
-!outputs/**/
-!outputs/**/.gitkeep
-!outputs/**/README.md
 
 work_dirs/**
 !work_dirs/.gitkeep
 !work_dirs/README.md
-!work_dirs/**/
-!work_dirs/**/.gitkeep
-!work_dirs/**/README.md
 
-# Jupyter
+checkpoints/**
+
+experiment_scripts/
+
+docs_summary/
+
+tests/
+
+scripts/deprecated/
+scripts/install/
+
+*.bat
+*.ps1
+
+PPT大纲.md
+
+D:/
+
+node_modules/
+
 .ipynb_checkpoints/
-
-# OS/editor
 .DS_Store
 Thumbs.db
 .vscode/
