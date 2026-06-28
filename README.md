@@ -93,11 +93,8 @@ ed-adv/
 │   └ WSL2_CUDA_INSTALLATION.md   # WSL2 GPU配置
 ├── deploy/                  # 部署脚本
 │   └ LINUX_DEPLOYMENT_GUIDE.md  # Linux服务器部署
-├── work_dirs/               # 模型权重与日志
-├── environment.yml          # Conda 环境定义
 ├── requirements.txt         # pip 依赖
-└ Dockerfile
-└ README.md
+└ README.md                  # 项目说明
 ```
 
 ---
