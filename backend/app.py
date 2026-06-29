@@ -364,6 +364,7 @@ def run_simulation_experiment(params, experiment_id, output_dir):
     pc_path = KITTI_DIR / "training" / "velodyne" / f"{sample_id}.bin"
     img_path = KITTI_DIR / "training" / "image_2" / f"{sample_id}.png"
     label_path = KITTI_DIR / "training" / "label_2" / f"{sample_id}.txt"
+    calib_path = KITTI_DIR / "training" / "calib" / f"{sample_id}.txt"
 
     if pc_path.exists():
         pc = np.fromfile(str(pc_path), dtype=np.float32).reshape(-1, 4)
@@ -376,6 +377,8 @@ def run_simulation_experiment(params, experiment_id, output_dir):
     else:
         np.random.seed(int(sample_id) + 1)
         img = np.random.randint(0, 256, (375, 1242, 3), dtype=np.uint8)
+
+    calib_path_str = str(calib_path) if calib_path.exists() else None
 
     gt_classes = []
     if label_path.exists():
@@ -390,6 +393,55 @@ def run_simulation_experiment(params, experiment_id, output_dir):
     # === 阶段2: 模型初始化 ===
     update_progress_file(output_dir, "running", 20, "模型初始化中...")
     time.sleep(1.5)
+
+    def predict_with_real_model(pc_data, img_data, calib_path_str):
+        import tempfile
+        with tempfile.NamedTemporaryFile(suffix='.bin', delete=False) as pc_tmp:
+            pc_tmp.write(pc_data.tobytes())
+            pc_tmp_path = pc_tmp.name
+        
+        with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as img_tmp:
+            Image.fromarray(img_data).save(img_tmp.name)
+            img_tmp_path = img_tmp.name
+        
+        try:
+            inference_script = f'''
+import sys
+sys.path.insert(0, '.')
+from scripts.mmdet3d_model import MMDetection3DModel
+
+model = MMDetection3DModel("configs/multimodal/mvxnet_kitti_3class.py")
+cls, conf = model.get_top_prediction("{pc_tmp_path}", "{img_tmp_path}", "{calib_path_str}")
+print(f"RESULT:{{cls}}:{{conf:.6f}}")
+            '''
+            
+            stdout, stderr = run_in_conda(inference_script, timeout=180)
+            
+            if stdout and "RESULT:" in stdout:
+                result_line = [line for line in stdout.strip().split('\\n') if line.startswith("RESULT:")][0]
+                parts = result_line.replace("RESULT:", "").split(':')
+                if len(parts) >= 2:
+                    pred_cls = parts[0]
+                    pred_conf = float(parts[1])
+                    return pred_cls, round(pred_conf, 4)
+            
+            if stderr:
+                app.logger.warning(f"真实模型推理失败，使用模拟: {stderr}")
+            
+            return None, None
+        except Exception as e:
+            app.logger.warning(f"真实模型推理异常，使用模拟: {e}")
+            return None, None
+        finally:
+            import os
+            try:
+                os.unlink(pc_tmp_path)
+            except:
+                pass
+            try:
+                os.unlink(img_tmp_path)
+            except:
+                pass
 
     def simulate_predict(gt_cls_list, stage="clean", points_removed=0, total_points=0, 
                          eps=None, ratio=None, method=None, steps=None,
@@ -490,7 +542,11 @@ def run_simulation_experiment(params, experiment_id, output_dir):
     # === 阶段3: 原始数据推理 ===
     update_progress_file(output_dir, "running", 30, "原始数据推理中...")
     time.sleep(1)
-    clean_pred, clean_conf = simulate_predict(gt_classes, "clean")
+    real_result_clean = predict_with_real_model(pc, img, calib_path_str)
+    if real_result_clean[0] is not None:
+        clean_pred, clean_conf = real_result_clean
+    else:
+        clean_pred, clean_conf = simulate_predict(gt_classes, "clean")
 
     # === 阶段4: 攻击生成 ===
     update_progress_file(output_dir, "running", 40, f"生成{attack_method}攻击...")
@@ -529,9 +585,13 @@ def run_simulation_experiment(params, experiment_id, output_dir):
     # === 阶段5: 攻击后推理 ===
     update_progress_file(output_dir, "running", 50, "攻击后推理中...")
     time.sleep(1)
-    adv_pred, adv_conf = simulate_predict(gt_classes, "adversarial", 
-                                           eps=pc_epsilon, ratio=perturb_ratio, 
-                                           method=attack_method, steps=pgd_steps)
+    real_result_adv = predict_with_real_model(adv_pc, adv_img, calib_path_str)
+    if real_result_adv[0] is not None:
+        adv_pred, adv_conf = real_result_adv
+    else:
+        adv_pred, adv_conf = simulate_predict(gt_classes, "adversarial", 
+                                               eps=pc_epsilon, ratio=perturb_ratio, 
+                                               method=attack_method, steps=pgd_steps)
 
     # === 阶段6: 防御处理 ===
     update_progress_file(output_dir, "running", 60, f"执行{defense_method}防御...")
@@ -577,11 +637,15 @@ def run_simulation_experiment(params, experiment_id, output_dir):
     update_progress_file(output_dir, "running", 70, "防御后推理中...")
     time.sleep(1)
     points_removed = len(adv_pc) - len(def_pc)
-    def_pred, def_conf = simulate_predict(gt_classes, "defended", points_removed, len(adv_pc),
-                                          eps=pc_epsilon, ratio=perturb_ratio, 
-                                          method=attack_method, steps=pgd_steps,
-                                          d_k=sor_k, d_std=sor_std_ratio, 
-                                          d_sigma=gaussian_sigma, d_method=defense_method)
+    real_result_def = predict_with_real_model(def_pc, def_img, calib_path_str)
+    if real_result_def[0] is not None:
+        def_pred, def_conf = real_result_def
+    else:
+        def_pred, def_conf = simulate_predict(gt_classes, "defended", points_removed, len(adv_pc),
+                                              eps=pc_epsilon, ratio=perturb_ratio, 
+                                              method=attack_method, steps=pgd_steps,
+                                              d_k=sor_k, d_std=sor_std_ratio, 
+                                              d_sigma=gaussian_sigma, d_method=defense_method)
 
     # === 阶段8: 生成可视化 ===
     update_progress_file(output_dir, "running", 80, "生成可视化结果...")
@@ -704,12 +768,14 @@ def run_simulation_experiment(params, experiment_id, output_dir):
 
     sor_removed = len(adv_pc) - len(def_pc)
 
+    used_real_model = (real_result_clean[0] is not None) or (real_result_adv[0] is not None) or (real_result_def[0] is not None)
+    
     result = {
         "id": experiment_id,
         "sample_id": sample_id,
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "gt_classes": gt_classes,
-        "model": "MVXNet (multimodal) - Simulation",
+        "model": "MVXNet (multimodal) - Real MMDetection3D" if used_real_model else "MVXNet (multimodal) - Simulation",
         "attack_method": attack_method,
         "defense_method": defense_method,
         "attack_params": {
