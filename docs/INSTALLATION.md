@@ -1,6 +1,6 @@
 # ART + MMDetection3D 安装说明
 
-本文档记录当前课题所需的最小可用环境，基于 Ubuntu 22.04 + CUDA 容器验证通过。
+本文档记录当前课题所需的最小可用环境，基于 Ubuntu 22.04 + CUDA 验证通过。
 
 ## 1. 环境目标
 
@@ -16,11 +16,7 @@
 
 ## 2. 推荐运行方式
 
-由于当前工作区里的虚拟环境是 Linux 风格布局，推荐在 Ubuntu 或 Docker 容器中执行安装，而不是直接在 Windows PowerShell 中使用该 `.venv`。
-
-推荐基础镜像：
-
-- `nvidia/cuda:12.4.1-runtime-ubuntu22.04`
+推荐在 Ubuntu 或 Windows WSL2 环境中执行安装。
 
 ## 3. 系统依赖
 
@@ -74,34 +70,31 @@ bash scripts/install_ubuntu_env.sh
 
 - `mmcv-lite 2.2.0` 与 `mmdet3d 1.4.0` 不建议混用，已替换为 `mmcv 2.1.0`
 - `mmdet 3.3.0` 已降级为 `mmdet 3.2.0`
-- 安装过程中容器可能提示未检测到 NVIDIA Driver，这不影响依赖安装，但会影响 GPU 训练
-- 若要真正进行 CUDA 训练，需要宿主机 NVIDIA 驱动正常，且 Docker 运行时具备 GPU 直通能力
+- 若要真正进行 CUDA 训练，需要宿主机 NVIDIA 驱动正常
 
-## 7. Windows 行尾与容器挂载说明
+## 7. Windows 行尾说明
 
-Windows 工作区下的 `.sh` 文件默认为 CRLF 行尾，直接在容器中运行会导致 `set: pipefail: invalid option name` 等错误。  
+Windows 工作区下的 `.sh` 文件默认为 CRLF 行尾，直接在 Linux/WSL2 中运行会导致 `set: pipefail: invalid option name` 等错误。  
 建议的做法：
 
 ```bash
 # 方法1：运行时直接规范化行尾
-docker run --rm -v "${PWD}:/workspace" -w /workspace 3d-adv-lab:cu124 bash -lc \
-  "tr -d '\r' < scripts/install_ubuntu_env.sh > /tmp/install.sh && bash /tmp/install.sh"
+tr -d '\r' < scripts/install_ubuntu_env.sh > /tmp/install.sh && bash /tmp/install.sh
 
 # 方法2：下载仓库后先转换所有 Shell 脚本为 LF
 dos2unix scripts/*.sh
 ```
 
-## 8. 无头容器（Headless）与渲染说明
+## 8. 无头模式与渲染说明
 
-在无桌面环境（如服务器或容器）中运行脚本时，渲染操作会因缺少显示服务而失败。  
+在无桌面环境（如服务器）中运行脚本时，渲染操作会因缺少显示服务而失败。  
 当前 `minimal_pointcloud_smoke_test.py` 默认**不启用渲染**，只输出 `.npy` 与 `.ply` 文件。  
 
 ```bash
-# 标准用法（推荐在容器中执行，无渲染）
-docker run --rm -v "${PWD}:/workspace" -w /workspace 3d-adv-lab:cu124 bash -lc \
-  "source /workspace/.venv/bin/activate && python scripts/minimal_pointcloud_smoke_test.py"
+# 标准用法（无渲染）
+source .venv/bin/activate && python scripts/minimal_pointcloud_smoke_test.py
 
-# 若需启用渲染预览（需图形环境，通常在本地 Linux 或借助 X11 forwarding）
+# 若需启用渲染预览（需图形环境）
 python scripts/minimal_pointcloud_smoke_test.py --render
 ```
 
@@ -112,9 +105,9 @@ python scripts/minimal_pointcloud_smoke_test.py --render
 ### 9.1 后端服务启动
 
 ```bash
-# 在容器中启动后端
-docker run --rm -v "${PWD}:/workspace" -w /workspace 3d-adv-lab:cu124 bash -lc \
-  "source /workspace/.venv/bin/activate && python backend/app.py"
+# 在 Linux/WSL2 环境中启动
+source .venv/bin/activate
+python backend/app.py
 
 # 或直接在Windows Conda环境中启动
 conda activate mm3d
@@ -135,5 +128,4 @@ npm run dev
 
 ## 10. 备注
 
-当前工作区中已经保留了安装脚本 [install_ubuntu_env.sh](../scripts/install_ubuntu_env.sh)、Python 依赖定义 `requirements.txt` 和 `environment.yml`。  
-Docker 镜像构建时会自动补齐所有系统库和 Python 包，无需手工操作。
+当前工作区中已经保留了安装脚本 [install_ubuntu_env.sh](../scripts/install_ubuntu_env.sh) 和 Python 依赖定义 `requirements.txt`。

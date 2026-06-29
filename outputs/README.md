@@ -8,9 +8,9 @@ Current smoke test outputs are stored under `outputs/smoke_test/`.
 
 ## 📁 实验文件夹详细说明
 
-### 1. **smoke_test/** [Docker 环境首次验证]
+### 1. **smoke_test/** [首次验证]
 - **执行时间**: 2026-04-06
-- **环境**: Docker 容器（3d-adv-lab:cu124）
+- **环境**: Linux 环境
 - **点云规模**: 2048 个随机点
 - **内容**:
 	- `clean.npy` (24.7 KB) - 原始点云
@@ -58,7 +58,7 @@ Current smoke test outputs are stored under `outputs/smoke_test/`.
 
 | 日期 | 实验名 | 环境 | 规模 | 输出格式 | 可视化 | 状态 |
 |------|--------|------|------|---------|--------|------|
-| 2026-04-06 | smoke_test | Docker | 2048点 | .npy/.ply | ❌ | ✅ |
+| 2026-04-06 | smoke_test | Linux | 2048点 | .npy/.ply | ❌ | ✅ |
 | 2026-04-06 | smoke_test_local | Python | 2048点 | .npy/.json | ✅ | ✅ |
 
 ---
